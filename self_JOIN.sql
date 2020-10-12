@@ -88,3 +88,27 @@ WHERE stopsa.name = 'Craiglockhart';
 -- Lochend. Show the bus no. and company for the first bus, the name of the
 -- stop for the transfer, and the bus no. and company for the second bus.
 
+SELECT trip1.num, trip1.company, trip1.transfer, trip2.num, trip2.company
+FROM (
+  SELECT DISTINCT a.num, a.company, stopsb.name AS transfer
+  FROM route AS a JOIN route AS b
+  ON a.company = b.company AND a.num = b.num
+  JOIN stops AS stopsa
+  ON a.stop = stopsa.id
+  JOIN stops AS stopsb
+  ON b.stop = stopsb.id
+  WHERE stopsa.name = 'Craiglockhart'
+) AS trip1
+JOIN (
+  SELECT DISTINCT c.num, c.company, stopsc.name AS departure
+  FROM route AS c JOIN route AS d
+  ON c.company = d.company AND c.num = d.num
+  JOIN stops AS stopsc
+  ON c.stop = stopsc.id
+  JOIN stops AS stopsd
+  ON d.stop = stopsd.id
+  WHERE stopsd.name = 'Lochend'
+) AS trip2
+ON trip1.transfer = trip2.departure
+ORDER BY trip1.num, trip1.transfer, trip2.num
+
